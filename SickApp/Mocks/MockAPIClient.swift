@@ -1,6 +1,8 @@
 import Foundation
 
 final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
+    static var registeredAbsences: [AbsenceRecord] = []
+
     var shouldFail = false
     var isEmpty = false
     var delay: Duration = .milliseconds(300)
@@ -32,13 +34,14 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func createAbsence(_ record: AbsenceRecord) async throws -> AbsenceRecord {
         try await simulateNetwork()
+        MockAPIClient.registeredAbsences.append(record)
         return record
     }
 
     func getAbsences(managerId: String, status: AbsenceStatus?, type: AbsenceType?) async throws -> [AbsenceRecord] {
         try await simulateNetwork()
         if isEmpty { return [] }
-        var records = PreviewData.absenceRecords
+        var records = PreviewData.absenceRecords + MockAPIClient.registeredAbsences
         if let status { records = records.filter { $0.status == status } }
         if let type { records = records.filter { $0.absenceType == type } }
         return records
@@ -46,7 +49,8 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func getAbsence(id: String) async throws -> AbsenceRecord {
         try await simulateNetwork()
-        guard let record = PreviewData.absenceRecords.first(where: { $0.id == id }) else {
+        let allRecords = PreviewData.absenceRecords + MockAPIClient.registeredAbsences
+        guard let record = allRecords.first(where: { $0.id == id }) else {
             throw APIError.notFound
         }
         return record
@@ -57,11 +61,18 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var record = try await getAbsence(id: id)
         if let endDate { record.endDate = endDate }
         if let status { record.status = status }
+        // Update in registeredAbsences if it exists there
+        if let index = MockAPIClient.registeredAbsences.firstIndex(where: { $0.id == id }) {
+            MockAPIClient.registeredAbsences[index] = record
+        }
         return record
     }
 
     func cancelAbsence(id: String) async throws {
         try await simulateNetwork()
+        if let index = MockAPIClient.registeredAbsences.firstIndex(where: { $0.id == id }) {
+            MockAPIClient.registeredAbsences[index].status = .cancelled
+        }
     }
 
     func extendAbsence(id: String, newEndDate: Date) async throws -> AbsenceRecord {

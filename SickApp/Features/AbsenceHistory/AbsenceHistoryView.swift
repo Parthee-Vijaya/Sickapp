@@ -83,7 +83,9 @@ struct AbsenceHistoryView: View {
                 }
             }
             .padding()
+            .padding(.bottom, 20)
         }
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 

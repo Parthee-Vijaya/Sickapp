@@ -26,20 +26,20 @@ struct ContentView: View {
 
     private var mainTabView: some View {
         TabView(selection: $selectedTab) {
-            Tab("Hjem", systemImage: "house.fill", value: 0) {
+            Tab("Registrering", systemImage: "plus.circle.fill", value: 0) {
+                RegistrationView(apiClient: apiClient, authService: authService)
+            }
+
+            Tab("Hjem", systemImage: "house.fill", value: 1) {
                 DashboardView(apiClient: apiClient, authService: authService)
             }
 
-            Tab("Team", systemImage: "person.3.fill", value: 1) {
+            Tab("Team", systemImage: "person.3.fill", value: 2) {
                 EmployeeListView(apiClient: apiClient)
             }
 
-            Tab("Historik", systemImage: "clock.fill", value: 2) {
+            Tab("Historik", systemImage: "clock.fill", value: 3) {
                 AbsenceHistoryView(apiClient: apiClient)
-            }
-
-            Tab("Statistik", systemImage: "chart.bar.fill", value: 3) {
-                AnalyticsView(apiClient: apiClient)
             }
 
             Tab("Indstillinger", systemImage: "gearshape.fill", value: 4) {

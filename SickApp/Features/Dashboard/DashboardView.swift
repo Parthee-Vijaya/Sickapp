@@ -57,7 +57,9 @@ struct DashboardView: View {
                     }
                 }
                 .padding(.vertical)
+                .padding(.bottom, 20)
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Hjem")
             .refreshable { await viewModel.refresh() }
             .task { await viewModel.loadData() }
