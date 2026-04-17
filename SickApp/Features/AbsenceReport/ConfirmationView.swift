@@ -24,6 +24,7 @@ struct ConfirmationView: View {
                     .foregroundStyle(Color.theme.success)
                     .scaleEffect(showCheckmark ? 1 : 0.3)
                     .opacity(showCheckmark ? 1 : 0)
+                    .symbolEffect(.bounce, value: showCheckmark)
             }
 
             Text("Fravær registreret")
@@ -39,7 +40,7 @@ struct ConfirmationView: View {
                     SummaryRow(label: "Slutdato", value: endDate.formatted(as: .dayMonthYear))
                 }
             }
-            .cardStyle()
+            .glassCard()
             .padding(.horizontal)
 
             if record.notificationSent, let name = groupName {
@@ -64,10 +65,7 @@ struct ConfirmationView: View {
                     onDone()
                 } label: {
                     Text("Tilbage til dashboard")
-                        .font(.headline)
-                        .foregroundStyle(Color.theme.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
+                        .secondaryButtonStyle()
                 }
             }
             .padding(.horizontal, 32)

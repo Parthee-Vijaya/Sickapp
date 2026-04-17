@@ -14,11 +14,11 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 // Account
-                Section("Konto") {
+                Section {
                     if let manager = viewModel.manager {
-                        HStack(spacing: 12) {
-                            AvatarView(name: manager.displayName, photoData: manager.photoData, size: 50)
-                            VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 14) {
+                            AvatarView(name: manager.displayName, photoData: manager.photoData, size: 56)
+                            VStack(alignment: .leading, spacing: 3) {
                                 Text(manager.displayName)
                                     .font(.headline)
                                 if let title = manager.jobTitle {
@@ -33,7 +33,10 @@ struct SettingsView: View {
                                 }
                             }
                         }
+                        .padding(.vertical, 4)
                     }
+                } header: {
+                    Text("Konto")
                 }
 
                 // Notifications

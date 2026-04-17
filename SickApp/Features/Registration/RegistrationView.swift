@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RegistrationView: View {
     @State private var viewModel: RegistrationViewModel
+    @State private var isAbsenceSectionCollapsed = false
+    @FocusState private var isSearchFocused: Bool
 
     init(apiClient: APIClientProtocol, authService: AuthServiceProtocol) {
         self._viewModel = State(initialValue: RegistrationViewModel(apiClient: apiClient, authService: authService))
@@ -47,6 +49,7 @@ struct RegistrationView: View {
             .padding(.bottom, 40)
         }
         .scrollDismissesKeyboard(.interactively)
+        .background(Color.theme.background)
         .errorBanner(viewModel.errorMessage)
         .confirmationDialog(
             "Raskmeld \(viewModel.confirmRaskmelding?.employeeName ?? "")?",
@@ -84,6 +87,7 @@ struct RegistrationView: View {
                     .foregroundStyle(.secondary)
                 TextField("Navn, afdeling eller stilling...", text: $viewModel.searchText)
                     .textFieldStyle(.plain)
+                    .focused($isSearchFocused)
 
                 if !viewModel.searchText.isEmpty {
                     Button {
@@ -95,8 +99,12 @@ struct RegistrationView: View {
                 }
             }
             .padding(12)
-            .background(Color.theme.secondaryBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.theme.glassBorder, lineWidth: 0.5)
+            )
 
             // Search results
             if !viewModel.filteredEmployees.isEmpty {
@@ -140,8 +148,13 @@ struct RegistrationView: View {
                     }
                 }
                 .frame(maxHeight: 300)
-                .background(Color.theme.secondaryBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.theme.glassBorder, lineWidth: 0.5)
+                )
+                .shadow(color: Color.theme.glassShadow, radius: 8, y: 4)
             }
         }
     }
@@ -177,9 +190,7 @@ struct RegistrationView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding()
-        .background(Color.theme.secondaryBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .glassCard()
     }
 
     // MARK: - Absence Type
@@ -215,8 +226,13 @@ struct RegistrationView: View {
             TextEditor(text: $viewModel.messageToTeam)
                 .frame(minHeight: 80)
                 .padding(8)
-                .background(Color.theme.secondaryBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .scrollContentBackground(.hidden)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.theme.glassBorder, lineWidth: 0.5)
+                )
                 .overlay(alignment: .topLeading) {
                     if viewModel.messageToTeam.isEmpty {
                         Text("Skriv en besked til teamet...")
@@ -255,8 +271,13 @@ struct RegistrationView: View {
             TextEditor(text: $viewModel.autoReplyText)
                 .frame(minHeight: 140)
                 .padding(8)
-                .background(Color.theme.secondaryBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .scrollContentBackground(.hidden)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.theme.glassBorder, lineWidth: 0.5)
+                )
         }
     }
 
@@ -303,7 +324,7 @@ struct RegistrationView: View {
                 confirmationRow(label: "Type", value: record.displayType)
                 confirmationRow(label: "Dato", value: record.startDate.formatted(as: .dayMonthYear))
             }
-            .cardStyle()
+            .glassCard()
             .padding(.horizontal)
 
             if !viewModel.autoReplyText.isEmpty {
@@ -316,9 +337,7 @@ struct RegistrationView: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(3)
                 }
-                .padding()
-                .background(Color.theme.secondaryBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .glassCard()
                 .padding(.horizontal)
             }
 
@@ -355,18 +374,33 @@ struct RegistrationView: View {
 
     private var activeAbsencesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "exclamationmark.circle.fill")
-                    .foregroundStyle(Color.theme.absent)
-                Text("Fraværende nu")
-                    .font(.headline)
-                Spacer()
-                Text("\(viewModel.activeAbsences.count)")
-                    .font(.subheadline.bold())
-                    .foregroundStyle(.secondary)
+            Button {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isAbsenceSectionCollapsed.toggle()
+                }
+                if !isAbsenceSectionCollapsed {
+                    isSearchFocused = false
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .foregroundStyle(Color.theme.absent)
+                    Text("Fraværende nu")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Text("\(viewModel.activeAbsences.count)")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(isAbsenceSectionCollapsed ? -90 : 0))
+                }
             }
 
-            ForEach(viewModel.activeAbsences) { record in
+            if !isAbsenceSectionCollapsed {
+                ForEach(viewModel.activeAbsences) { record in
                 Button {
                     viewModel.confirmRaskmelding = record
                 } label: {
@@ -398,14 +432,31 @@ struct RegistrationView: View {
                         }
                     }
                     .padding(12)
-                    .background(record.absenceType.color.opacity(0.06))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(record.absenceType.color.opacity(0.2), lineWidth: 0.5)
+                    )
+                }
                 }
             }
         }
         .padding()
-        .background(Color.theme.secondaryBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.theme.absent.opacity(0.2), lineWidth: 0.5)
+        )
+        .shadow(color: Color.theme.glassShadow, radius: 8, y: 4)
+        .onChange(of: isSearchFocused) { _, focused in
+            if focused {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isAbsenceSectionCollapsed = true
+                }
+            }
+        }
     }
 
     // MARK: - Raskmeldt Overlay

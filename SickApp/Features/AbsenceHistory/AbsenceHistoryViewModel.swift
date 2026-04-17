@@ -1,12 +1,18 @@
 import Foundation
 
+enum HistoryDisplayMode: String, CaseIterable {
+    case list, calendar, statistics
+}
+
 @Observable
 final class AbsenceHistoryViewModel {
     var records: [AbsenceRecord] = []
+    var stats: AbsenceStats?
     var isLoading = false
     var errorMessage: String?
     var selectedTypeFilter: AbsenceType?
-    var showCalendarView = false
+    var displayMode: HistoryDisplayMode = .list
+    var selectedStatsPeriod: StatsPeriod = .month
 
     private let apiClient: APIClientProtocol
 
@@ -39,6 +45,14 @@ final class AbsenceHistoryViewModel {
             errorMessage = error.localizedDescription
         }
         isLoading = false
+    }
+
+    func loadStats(managerId: String) async {
+        do {
+            stats = try await apiClient.getAbsenceStats(managerId: managerId, period: selectedStatsPeriod)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func endAbsence(id: String, endDate: Date) async {

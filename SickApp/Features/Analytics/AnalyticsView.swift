@@ -115,6 +115,7 @@ struct AnalyticsView: View {
                 }
                 .padding(.vertical)
             }
+            .background(Color.theme.background)
             .navigationTitle("Statistik")
             .task { await viewModel.loadStats(managerId: "") }
             .errorBanner(viewModel.errorMessage)

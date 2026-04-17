@@ -166,14 +166,20 @@ enum PreviewData {
     ]
 
     static let absenceStats = AbsenceStats(
-        totalDays: 12,
-        totalRecords: 8,
+        totalDays: 24,
+        totalRecords: 14,
         byType: [
-            .init(type: .sygdom, count: 5, days: 8),
-            .init(type: .barnSygedag, count: 2, days: 3),
-            .init(type: .andet, count: 1, days: 1),
+            .init(type: .sygdom, count: 8, days: 16),
+            .init(type: .barnSygedag, count: 4, days: 6),
+            .init(type: .andet, count: 2, days: 2),
         ],
         monthlyTrend: [
+            .init(month: "Maj", count: 2, days: 3),
+            .init(month: "Jun", count: 1, days: 1),
+            .init(month: "Jul", count: 1, days: 2),
+            .init(month: "Aug", count: 2, days: 3),
+            .init(month: "Sep", count: 1, days: 2),
+            .init(month: "Okt", count: 3, days: 4),
             .init(month: "Nov", count: 3, days: 5),
             .init(month: "Dec", count: 2, days: 3),
             .init(month: "Jan", count: 4, days: 6),
@@ -181,7 +187,18 @@ enum PreviewData {
             .init(month: "Mar", count: 3, days: 4),
             .init(month: "Apr", count: 2, days: 3),
         ],
-        previousPeriodDays: 10
+        previousPeriodDays: 20,
+        averageDaysPerMonth: 2.0,
+        absencePercentage: 3.8,
+        totalEmployees: 28,
+        byWeekday: [
+            .init(weekday: "Man", count: 6),
+            .init(weekday: "Tir", count: 3),
+            .init(weekday: "Ons", count: 2),
+            .init(weekday: "Tor", count: 3),
+            .init(weekday: "Fre", count: 5),
+        ],
+        bradfordFactor: 392
     )
 
     static let activeAbsences: [AbsenceRecord] = absenceRecords.filter { $0.isActive }

@@ -54,6 +54,7 @@ struct ContentView: View {
                 )
             }
         }
+        .tint(Color.theme.primary)
     }
 }
 

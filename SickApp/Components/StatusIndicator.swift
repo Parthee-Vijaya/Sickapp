@@ -11,8 +11,10 @@ struct StatusIndicator: View {
             .frame(width: size, height: size)
             .overlay(
                 Circle()
-                    .stroke(Color(.systemBackground), lineWidth: 2)
+                    .stroke(Color.theme.cardBackground, lineWidth: 2)
             )
+            .shadow(color: indicatorColor.opacity(0.5), radius: isAbsent ? 4 : 0)
+            .symbolEffect(.pulse, isActive: isAbsent)
     }
 
     private var indicatorColor: Color {

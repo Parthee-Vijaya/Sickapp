@@ -11,29 +11,11 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Greeting
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(viewModel.greeting)
-                                .font(.title2.bold())
-                            Text("Her er dit overblik for i dag")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        if let manager = viewModel.manager {
-                            AvatarView(name: manager.displayName, photoData: manager.photoData, size: 48)
-                        }
-                    }
-                    .padding(.horizontal)
+                    // Hero card (Muzli-inspired dark card)
+                    heroSection
 
-                    // Stats cards
-                    HStack(spacing: 12) {
-                        StatCard(title: "Fraværende", value: "\(viewModel.absentCount)", color: Color.theme.absent, icon: "person.fill.xmark")
-                        StatCard(title: "Team", value: "\(viewModel.teamSize)", color: Color.theme.info, icon: "person.3.fill")
-                        StatCard(title: "Tilgæng.", value: "\(viewModel.availabilityPercentage)%", color: Color.theme.available, icon: "checkmark.circle.fill")
-                    }
-                    .padding(.horizontal)
+                    // Quick stats row
+                    quickStatsRow
 
                     // Active absences
                     if !viewModel.activeAbsences.isEmpty {
@@ -60,6 +42,7 @@ struct DashboardView: View {
                 .padding(.bottom, 20)
             }
             .scrollDismissesKeyboard(.interactively)
+            .background(Color.theme.background)
             .navigationTitle("Hjem")
             .refreshable { await viewModel.refresh() }
             .task { await viewModel.loadData() }
@@ -71,6 +54,79 @@ struct DashboardView: View {
             .errorBanner(viewModel.errorMessage)
         }
     }
+
+    // MARK: - Hero Section
+
+    private var heroSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Greeting row
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(viewModel.greeting)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.7))
+                    Text("Dit overblik")
+                        .font(.title2.bold())
+                        .foregroundStyle(.white)
+                }
+                Spacer()
+                if let manager = viewModel.manager {
+                    AvatarView(name: manager.displayName, photoData: manager.photoData, size: 48)
+                }
+            }
+
+            // Gradient KPI card inside hero (Muzli pattern)
+            HStack(spacing: 0) {
+                kpiItem(value: "\(viewModel.absentCount)", label: "Fraværende", sublabel: "i dag")
+                Divider()
+                    .frame(height: 40)
+                    .overlay(Color.white.opacity(0.3))
+                kpiItem(value: "\(viewModel.availabilityPercentage)%", label: "Tilgæng.", sublabel: "af teamet")
+                Divider()
+                    .frame(height: 40)
+                    .overlay(Color.white.opacity(0.3))
+                kpiItem(value: "\(viewModel.teamSize)", label: "Team", sublabel: "medarbejdere")
+            }
+            .padding(.vertical, 16)
+            .padding(.horizontal, 8)
+            .background(
+                LinearGradient(
+                    colors: [Color.theme.gradientTerracotta, Color.theme.gradientCoral, Color.theme.gradientAmber],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .heroCard()
+        .padding(.horizontal)
+    }
+
+    private func kpiItem(value: String, label: String, sublabel: String) -> some View {
+        VStack(spacing: 4) {
+            Text(value)
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+            Text(label)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.white.opacity(0.9))
+            Text(sublabel)
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.6))
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Quick Stats
+
+    private var quickStatsRow: some View {
+        HStack(spacing: 12) {
+            StatCard(title: "Fraværende", value: "\(viewModel.absentCount)", color: Color.theme.absent, icon: "person.fill.xmark")
+            StatCard(title: "Team", value: "\(viewModel.teamSize)", color: Color.theme.info, icon: "person.3.fill")
+            StatCard(title: "Tilgæng.", value: "\(viewModel.availabilityPercentage)%", color: Color.theme.available, icon: "checkmark.circle.fill")
+        }
+        .padding(.horizontal)
+    }
 }
 
 // MARK: - Subviews
@@ -81,11 +137,14 @@ private struct StatCard: View {
     let color: Color
     let icon: String
 
+    @State private var appeared = false
+
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundStyle(color)
+                .symbolEffect(.bounce, value: appeared)
             Text(value)
                 .font(.title.bold())
             Text(title)
@@ -94,6 +153,7 @@ private struct StatCard: View {
         }
         .frame(maxWidth: .infinity)
         .cardStyle()
+        .onAppear { appeared = true }
     }
 }
 
@@ -127,8 +187,13 @@ private struct ActiveAbsenceRow: View {
             }
         }
         .padding()
-        .background(record.absenceType.color.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .background(Color.theme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(record.absenceType.color.opacity(0.15), lineWidth: 0.5)
+        )
+        .shadow(color: Color.theme.cardShadow, radius: 8, y: 4)
     }
 }
 

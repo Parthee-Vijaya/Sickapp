@@ -47,6 +47,11 @@ struct AbsenceStats: Codable {
     let byType: [AbsenceTypeCount]
     let monthlyTrend: [MonthlyCount]
     let previousPeriodDays: Int
+    let averageDaysPerMonth: Double
+    let absencePercentage: Double
+    let totalEmployees: Int
+    let byWeekday: [WeekdayCount]
+    let bradfordFactor: Int
 
     var trendPercentage: Double {
         guard previousPeriodDays > 0 else { return 0 }
@@ -65,5 +70,11 @@ struct AbsenceStats: Codable {
         let count: Int
         let days: Int
         var id: String { month }
+    }
+
+    struct WeekdayCount: Codable, Identifiable {
+        let weekday: String
+        let count: Int
+        var id: String { weekday }
     }
 }

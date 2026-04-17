@@ -95,12 +95,16 @@ private struct EmployeeRow: View {
 
             if let absence {
                 Text(absence.absenceType.displayName)
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(absence.absenceType.color.opacity(0.15))
+                    .font(.caption.weight(.medium))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(.ultraThinMaterial)
                     .foregroundStyle(absence.absenceType.color)
                     .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(absence.absenceType.color.opacity(0.3), lineWidth: 0.5)
+                    )
             }
 
             Image(systemName: "chevron.right")
